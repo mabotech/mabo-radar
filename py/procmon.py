@@ -244,7 +244,7 @@ class StateCache:
         """%(self.device )
         
         Subject = 'Please check AVL Monitor:%s'%(self.device )
-        mailfrom = 'jianjun.ma@cummins.com'
+        mailfrom = 'jianjun.ma@mail.com'
         mailto = ['ma@mabotech.com','sun@mail.com','ma@mail.com']
         
         mailclient.send(mailfrom, mailto, Subject, html_part)
