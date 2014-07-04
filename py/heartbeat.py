@@ -1,79 +1,115 @@
+# -*- coding: utf-8 -*-
+
+"""
+app supervisor - heartbeat checker
+"""
+
+import time
+import random
 
 import redis
 
-import gevent
 
+import gevent
 from gevent import Timeout
 from gevent.pool import Pool
 
-import time
 
+#redis pool
+REDIS_MAX_CONNECTIONS = 100
 
-r = redis.Redis(host='localhost', port=6379, db=1)
+rpool = redis.ConnectionPool(host='localhost', port=6379, db=1, \
+            max_connections=REDIS_MAX_CONNECTIONS)
+
+print dir(rpool)
+print rpool.max_connections
+
+rclient = redis.Redis(connection_pool=rpool) 
+
 
 class TimeoutException(Exception):
+    """ timeout exception for gevent Timeout"""
     pass
 
+class Point(object):
+    """ Data Point"""
+    def __init__(self):
+        pass
+    
 def start(name):
     """start time"""
-    t =  time.time()
-    r.set("%s.start" % (name), t)    
-    
+    timestamp =  time.time()
+    rclient.set("%s.start" % (name), timestamp)    
 
 def heartbeat(name):
     """heartbeat to redis"""
-    t =  time.time()
-    r.set(name, t) 
-    print ( "%s:%s" % (name, t) )
+    timestamp =  time.time()
+    rclient.set(name, timestamp) 
+    print ( "%s:%s" % (name, timestamp) )
+    
+def sendmail(msg):    
+    """send mail"""
+    print(msg)    
+    
+def restart(name):
+    """restart process / service"""
+    msg = "restart [%s]" % (name)
+    alert(msg)
+    print(msg)
+    
+def alert(msg):
+    """
+    put info to redis here
+    """
+    sendmail(msg)
 
-def f1():
+def func1():
     
     """function and heartbeat"""
     
     ex = TimeoutException("timeout ex")
     
-    timeout = Timeout(5, ex)
+    #gevent timeout
+    timeout = Timeout(6, ex)
+    #start
     timeout.start()
     try:
-        """
-        exception will be raised here, after *seconds* 
-        passed since start() call
-        """
-        gevent.sleep(11)
+        
+        # exception will be raised here, after *seconds* 
+        # passed since start() call
+        
+        gevent.sleep(3 * random.randint(1,4))
         #print "f1 heart beat"
         heartbeat("f1")
 
     except TimeoutException as ex:
         print ex
     finally:
+        #cancel timeout
         timeout.cancel()
-
 
 def main():
 
-    """spawn"""
-
+    """spawn"""    
      
-     
-    v = r.get('f1')   
+    val = rclient.get('f1')   
 
-    print(v)
+    print(val)
     
     pool = Pool(20)
     
     start('f1')
-
+    
+    #loop forever
     while True:
         
-        #print( time.time() )
-        
-        pool.spawn(f1)
+        #print( time.time() )        
+        pool.spawn(func1)
         #print pool.wait_available()
         print ( pool.free_count() )
         
-        #
-        gevent.sleep(2)    
-        
+        #sleep
+        gevent.sleep(2)        
         
 
 if __name__ == "__main__":
