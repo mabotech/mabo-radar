@@ -21,9 +21,6 @@ REDIS_MAX_CONNECTIONS = 100
 rpool = redis.ConnectionPool(host='localhost', port=6379, db=1, \
             max_connections=REDIS_MAX_CONNECTIONS)
 
-print dir(rpool)
-print rpool.max_connections
-
 rclient = redis.Redis(connection_pool=rpool) 
 
 
