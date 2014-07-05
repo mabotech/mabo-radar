@@ -7,13 +7,22 @@ app supervisor - heartbeat checker
 import time
 import random
 
+#fix
+#import dateutil
+import arrow
 import redis
 
+#fix
 import greenlet
 
 import gevent
 from gevent import Timeout
 from gevent.pool import Pool
+
+from logbook import Logger
+log = Logger('heartbeat')
+
+log.info('start')
 
 
 #redis pool
@@ -61,7 +70,16 @@ def alert(msg):
     """
     sendmail(msg)
 
+
+
 def func1():
+    
+        
+    utc = arrow.utcnow()
+    local = utc.to('Asia/Shanghai')
+    ts = local.timestamp
+    print arrow.get(ts)
+    #print local.format('YYYY-MM-DD HH:mm:ss ZZ')
     
     """function and heartbeat"""
     
@@ -97,6 +115,9 @@ def main():
     pool = Pool(20)
     
     start('f1')
+    
+
+    
     
     #loop forever
     while True:
