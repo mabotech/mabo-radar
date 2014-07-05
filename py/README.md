@@ -12,3 +12,11 @@
 
 flask / http server instead of while loop?
 
+
+## Dev
+
+
+`pip install pyinstaller`
+
+`pyinstaller heartbeat.py`
+
